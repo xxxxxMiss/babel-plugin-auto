@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should works 1`] = `
+"\\"use strict\\";
+
+var _index = _interopRequireDefault(require(\\"index.less\\"));
+
+var _bind = _interopRequireDefault(require(\\"classnames/bind\\"));
+
+var cx = _bind.default.bind(_index.default);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const User = () => {
+  return /*#__PURE__*/React.createElement(\\"div\\", {
+    className: _bind.default.bind(_index.default)('page-user')
+  }, /*#__PURE__*/React.createElement(\\"span\\", {
+    className: cx('user-logo')
+  }));
+};"
+`;

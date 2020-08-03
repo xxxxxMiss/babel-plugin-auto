@@ -10,7 +10,7 @@ function constructImportDeclaration(t) {
 }
 
 function constructVariableDeclaration(t) {
-  return t.variableDeclaration('const', [
+  return t.variableDeclaration('var', [
     t.VariableDeclarator(
       t.identifier('cx'),
       t.callExpression(
@@ -31,20 +31,46 @@ export default function ({ types: t }) {
           path.insertAfter(constructImportDeclaration(t))
           const variable = constructVariableDeclaration(t)
           state.var = variable
+          path.insertAfter(variable)
+          const programPath = path.findParent(p => {
+            return p.isProgram()
+          })
+          if (!programPath.scope.hasBinding('cx')) {
+            programPath.scope.push(state.var.declarations[0])
+            const node = programPath.scope.getBinding('cx').path.node
+            state.node = node
+          }
         }
       },
 
       CallExpression(path, state) {
         const { callee, arguments: args } = path.node
         if (callee.name === 'cx') {
-          const programPath = path.findParent(p => {
-            return p.isProgram()
-          })
-          if (programPath && !programPath.scope.hasBinding('cx')) {
-            programPath.scope.push(state.var.declarations[0])
-            const cxnode = programPath.scope.getBinding('cx').path.node
-            path.replaceWith(t.callExpression(cxnode.init, args))
-          }
+          path.replaceWith(t.callExpression(state.node.init, args))
+        }
+      },
+
+      ExpressionStatement(path, state) {
+        const { expression } = path.node
+        if (t.isCallExpression(expression) && expression.callee.name === 'cx') {
+          path.replaceWith(
+            t.ExpressionStatement(
+              t.callExpression(state.node.init, expression.arguments),
+            ),
+          )
+        }
+      },
+
+      VariableDeclaration(path, state) {
+        const { declarations } = path.node
+        const target = declarations[0]
+        if (
+          target &&
+          target.init &&
+          target.init.callee &&
+          target.init.callee.name === 'cx'
+        ) {
+          target.init = t.callExpression(state.node.init, target.init.arguments)
         }
       },
     },

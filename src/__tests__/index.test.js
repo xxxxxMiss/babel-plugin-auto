@@ -4,13 +4,11 @@ import plugin from '../'
 const str = `
 import styles from 'index.less'
 
-const User = () => {
-  return (
-    <div className={cx('page-user')}>
-      <span className={cx('user-logo')}></span>
-    </div>
-  )
+const x = {
+  o: cx('name')
 }
+cx('hello-world')
+const y = cx('test')
 `
 
 test('should works', () => {
